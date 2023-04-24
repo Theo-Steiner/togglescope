@@ -5,17 +5,24 @@ end
 
 local builtin = require 'telescope.builtin'
 
--- internal
+--- internal for now, might expose later if needed
+--- @type {defaults: {[string]: Opts}}
 local M = {
 	defaults = {},
 }
 
+--- Generate a function, that calls a picker alternately with its original or modified opts
+--- @param picker_name PickerName
+--- @param toggle_opts Opts
 M.toggle = function(toggle_opts, picker_name)
+	--- @param _opts Opts
+	--- @param callback PickerFunction
 	return function(_opts, callback)
-		-- deepcopy, so telescope internal tables are not modified
+		--- deepcopy, so telescope internal tables are not modified
+		--- @type Opts
 		local opts = vim.deepcopy(_opts)
 		if not M.defaults[picker_name] then
-			-- deepcopy, so defaults are not modified after the fact
+			--- deepcopy, so defaults are not modified after the fact
 			M.defaults[picker_name] = vim.deepcopy(opts)
 		end
 		if vim.deep_equal(opts, M.defaults[picker_name]) then
@@ -28,8 +35,12 @@ M.toggle = function(toggle_opts, picker_name)
 	end
 end
 
+--- Generates a "launch" function, that launches a picker with preconfigured keyhandlers
+--- @param picker_fn PickerFunction
+--- @param toggle_fns {[Keybinding]: Opts}
 M.add_action = function(picker_fn, toggle_fns)
 	local query = nil
+	--- @param opts Opts
 	local function launch(opts)
 		opts = opts or {}
 
@@ -58,15 +69,16 @@ M.add_action = function(picker_fn, toggle_fns)
 	return launch
 end
 
--- generate a picker based on a builtin picker, with custom attach_mappings
+--- Generates a picker based on a builtin picker, with custom attach_mappings
+--- @param picker_name PickerName
+--- @param attach_config AttachConfig
 M.generate_picker = function(picker_name, attach_config)
 	local picker_fn = builtin[picker_name]
 	if not picker_fn then
-		print(('telescope.builtin.' .. picker_name))
 		error('Could not find picker ' .. picker_name)
 	end
-	-- every valid top level entry of the attach_config is a key-combo (eg. '<C-^>')
-	-- each key map toggles a certain set of toggle_opts
+	--- every valid top level entry of the attach_config is a key-combo (eg. '<C-^>')
+	--- each key map toggles a certain set of toggle_opts
 	local toggle_functions = {}
 	for keybinding, toggle_opts in pairs(attach_config) do
 		toggle_functions[keybinding] = M.toggle(toggle_opts, picker_name)
@@ -74,22 +86,47 @@ M.generate_picker = function(picker_name, attach_config)
 	return M.add_action(picker_fn, toggle_functions)
 end
 
--- exposed to the enduser - holds generated pickers
+--- exposed to the enduser - holds generated pickers
+--- @type {config: Config} | TogglescopePickers
 local togglescope = {}
 
--- see https://github.com/nvim-telescope/telescope.nvim/blob/master/developers.md#bundling-as-extension
+--- @see github.com/nvim-telescope/telescope.nvim/blob/master/developers.md#bundling-as-extension
 return telescope.register_extension {
-	-- is run after telescope setup
+	--- is run after telescope setup
+	--- @param user_config Config
 	setup = function(user_config)
-		-- accept user_config
-		-- TODO: add default config (with my preferences)
+		--- accept user_config
 		togglescope.config = user_config or {}
-		-- generate a picker with custom attach mappings for every top level entry of the config
-		-- currently only "telescope.builtin" pickers are valid top level entries
+		--- generate a picker with custom attach mappings for every top level entry of the config
+		--- currently only "telescope.builtin" pickers are valid top level entries
 		for picker_name, picker_config in pairs(togglescope.config) do
 			togglescope[picker_name] = M.generate_picker(picker_name, picker_config)
 		end
 	end,
-	-- make generated pickers accessible via require('telescope').extensions.togglescope[picker_name]
+	--- make generated pickers accessible via
+	--- require('telescope').extensions.togglescope[picker_name]
 	exports = togglescope,
 }
+
+--- TYPES
+
+---@alias PickerName
+---| "'{picker_name}'" # currently only telescope builtin pickers are allowed
+
+---@alias Keybinding
+---| string # such as '<C-^>'
+
+---@alias Opts
+---| {[string]: string | number | {} | fun(number, any): any}
+
+---@alias AttachConfig
+---| {[Keybinding]: Opts}
+
+--- @alias Config
+---| {[string]: AttachConfig}
+
+--- @alias PickerFunction
+---| fun(Opts): nil
+
+--- @alias TogglescopePickers
+---| {[PickerName]: PickerFunction}
