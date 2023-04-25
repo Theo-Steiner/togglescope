@@ -2,6 +2,8 @@
 
 **Togglescope** is an extension for [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim#pickers) that allows you to toggle between two picker configurations with just one keypress.
 
+![togglescope in action](https://user-images.githubusercontent.com/40017636/234332528-1dc07a2a-d8a3-4be2-ac79-7882d0bbc0e9.gif)
+
 ## Example Use Case
 
 By default, telescope's live_grep or find_files pickers do not search through hidden or gitignored files. I sometimes find myself grepping for a string, only to then remember that the string I'm looking for is in some random file inside an ignored directory.
@@ -165,3 +167,7 @@ require('telescope').setup({
     }
 })
 ```
+
+## Acknowledgements
+
+This extension was heavily influenced and inspired by https://github.com/molecule-man/telescope-menufacture.
