@@ -22,34 +22,34 @@ There's three steps to the process:
 
 ```lua
 {
-    -- 1. Register "Theo-Steiner/togglescope" as a dependency to telescope
-	"nvim-telescope/telescope.nvim",
-	dependencies = { 
+    --- 1. Register "Theo-Steiner/togglescope" as a dependency to telescope
+  "nvim-telescope/telescope.nvim",
+  dependencies = { 
       "Theo-Steiner/togglescope"
     },
-    -- 2. Configure togglescope in the extensions setting of your telescope config
-	config = function()
-		require("telescope").setup({
-			extensions = {
-				togglescope = {
-					find_files = {
-                                            ['<C-^>'] = {
-                                                hidden = true,
-                                            }
-					}
-				}
-			},
-		})
-	end,
-    -- 3. Configure a keymap to launch the togglescope picker
-	keys = {
-		{
-			"<leader>ff",
-			function()
-				require('telescope').extensions.togglescope.find_files()
-			end
-		},
-	},
+    --- 2. Configure togglescope in the extensions setting of your telescope config
+  config = function()
+    require("telescope").setup({
+      extensions = {
+        togglescope = {
+          find_files = {
+            ['<C-^>'] = {
+              hidden = true,
+            }
+          }
+        }
+      },
+    })
+  end,
+    --- 3. Configure a keymap to launch the togglescope picker
+  keys = {
+    {
+      "<leader>ff",
+      function()
+        require('telescope').extensions.togglescope.find_files()
+      end
+    },
+  },
 }
 ```
 
@@ -65,13 +65,15 @@ A valid `extensions.togglescope` config is structured as `picker_name > keymap >
 local picker_name = 'find_files'
 
 --- The keymap that toggles between the toggleable config and the default config.
---- For now the keymap will always be set in insert and normal mode. If necessary I might make this configurable at a later point.
+--- For now the keymap will always be set in insert and normal mode.
+--- If necessary I might make this configurable at a later point.
 --- @type '<C-^>' | '<C-f>' | '<C-y>' ...whatever you want!
 local keymap = '<C-^>'
 
 --- The toggleable_config you want to switch to when you hit your keybinding.
---- 'togglescope_title' is a special property that allows you to set a title for the picker when your toggleable config is active.
---- @type {[string]: any, togglescope_title: string} ...any valid config for a specific builtin picker!
+--- 'togglescope_title' is a special property that allows you to set a title
+--- that is displayed when your toggleable config is active.
+--- @type {[string]: any, togglescope_title: string} ...any valid picker config!
 local toggleable_config = {
     no_ignore = true,
     togglescope_title = "Find Files (hidden)"
@@ -93,14 +95,14 @@ For every `picker_name` you add as a top level key to your `togglescope_config`,
 These modified pickers are accessible from `require('telescope').extensions.togglescope` and can be used as you would use builtin telescope pickers.
 
 ```lua
--- old keymap
+--- old keymap
 {
     "<leader>ff",
     function()
         require('telescope.builtin').find_files()
     end
 }
--- simply becomes
+--- simply becomes
 {
     "<leader>ff",
     function()
@@ -119,45 +121,46 @@ For now I use togglescope to toggle between searching through hidden files using
 
 ```lua
 local togglescope_config = {
-    -- configure find_files as a togglescope picker
+    --- configure find_files as a togglescope picker
     find_files = { 
-        -- on alternate file hotkey <C-^> toggle to the below config
+        --- on alternate file hotkey <C-^> toggle to the below config
         ['<C-^>'] = {
-            -- search through hidden files/directories
+            --- search through hidden files/directories
             hidden = true,
-            -- search through ignored directories/files (I occasionally want to look into node_modules)
+            --- search through ignored directories/files 
+            --- (I occasionally want to look into node_modules)
             no_ignore = true,
-            -- when this config is active, set the title to this
+            --- when this config is active, set the title to this
             togglescope_title = "Find Files (hidden)"
         }
     },
-    -- configure find_files as a togglescope picker
+    --- configure find_files as a togglescope picker
     live_grep = {
-        -- on alternate file hotkey <C-^> toggle to the below config
+        --- on alternate file hotkey <C-^> toggle to the below config
         ['<C-^>'] = {
-            -- with the live_grep picker args/flags are passed to ripgrep using "additional_args"
+            --- flags are passed to ripgrep using "additional_args"
             additional_args = {
-                -- search through hidden files/directories
+                --- search through hidden files/directories
                 '--hidden',
-                -- search through ignored directories/files (I occasionally want to look into node_modules)
+                --- search through ignored directories/files 
                 '--no-ignore',
-                -- specify a glob for the search
+                --- specify a glob for the search
                 "-g",
-                -- ignore the glob of "package-lock.json" (mostly no useful info in there)
+                --- ignore the glob of "package-lock.json" 
                 "!package-lock.json",
             },
-            -- when this config is active, set the title to this
+            --- when this config is active, set the title to this
             togglescope_title = "Live Grep (hidden)"
         }
     }
 } 
 require('telescope').setup({
     extensions = {
-        -- configure togglescope with the above config
+        --- configure togglescope with the above config
         togglescope = togglescope_config
     },
     defaults = {
-        -- set an ignore pattern to always ignore files in the .git directory
+        --- set an ignore pattern to always ignore files in the .git directory
         file_ignore_patterns = { "^.git/" },
     }
 })
