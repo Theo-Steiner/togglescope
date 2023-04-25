@@ -7,7 +7,9 @@
 ## Example Use Case
 
 By default, telescope's live_grep or find_files pickers do not search through hidden or gitignored files. I sometimes find myself grepping for a string, only to then remember that the string I'm looking for is in some random file inside an ignored directory.
+
 Now if you're like me, and you struggle to remember how to launch a picker with a configuration that doesn't ignore the file you're looking for, **togglescope** is the tool for you!
+
 Just hit the keymap you configured, and like magic your picker's configuration is swapped with a config more suitable to the special job you're trying to do.
 If you change your mind and want your default config back, just hit the same keymap again and everything returns to the way it was.
 
