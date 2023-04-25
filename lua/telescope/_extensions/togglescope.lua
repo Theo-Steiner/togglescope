@@ -3,7 +3,7 @@ if not has_telescope then
 	error 'Could not find telescope.nvim (https://github.com/nvim-telescope/telescope.nvim)'
 end
 
-local builtin = require 'telescope.builtin'
+local builtin = require('telescope.builtin')
 
 --- internal for now, might expose later if needed
 --- @type {defaults: {[string]: Opts}}
@@ -16,8 +16,8 @@ local M = {
 --- @param toggle_opts Opts
 M.toggle = function(toggle_opts, picker_name)
 	--- @param _opts Opts
-	--- @param callback PickerFunction
-	return function(_opts, callback)
+	--- @param launch PickerFunction
+	return function(_opts, launch)
 		--- deepcopy, so telescope internal tables are not modified
 		--- @type Opts
 		local opts = vim.deepcopy(_opts)
@@ -31,7 +31,7 @@ M.toggle = function(toggle_opts, picker_name)
 		else
 			opts = M.defaults[picker_name]
 		end
-		callback(opts)
+		launch(opts, true)
 	end
 end
 
@@ -41,8 +41,12 @@ end
 M.add_action = function(picker_fn, toggle_fns)
 	local query = nil
 	--- @param opts Opts
-	local function launch(opts)
+	local function launch(opts, is_keymap_invocation)
 		opts = opts or {}
+		if not is_keymap_invocation then
+			--- reset default opts
+			M.defaults = {}
+		end
 
 		opts.attach_mappings = function(new_bufnr, map)
 			-- restore previous query if exists
@@ -63,6 +67,7 @@ M.add_action = function(picker_fn, toggle_fns)
 			return true
 		end
 
+		--- call the picker function with modified opts
 		picker_fn(vim.tbl_extend('force', opts, { default_text = opts.prompt_value }))
 	end
 
@@ -126,7 +131,7 @@ return telescope.register_extension {
 ---| {[string]: AttachConfig}
 
 --- @alias PickerFunction
----| fun(Opts): nil
+---| fun(Opts, is_keymap_invocation?: boolean): nil
 
 --- @alias TogglescopePickers
 ---| {[PickerName]: PickerFunction}
